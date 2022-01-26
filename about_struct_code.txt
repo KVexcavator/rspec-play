@@ -1,0 +1,122 @@
+Варианты общего описания теста:
+RSpec.describe 'My awesome gardening API' do
+RSpec.describe Perennials::Rhubarb do
+RSpec.describe Perennials do
+RSpec.describe my_favorite_broccoli do
+RSpec.describe Garden, 'in winter' do
+--------------------------------------------
+RSpec.describe 'A kettle of water' do
+  context 'when boiling' do - это алиас на describe 'when boiling' do
+--------------------------------------------
+it имеет алиасы example, specify
+--------------------------------------------
+Можно задать свои собственные алиасы, например:
+RSpec.configure do |rspec|
+  rspec.alias_example_group_to :pdescribe, pry: true # алиас describe
+  rspec.alias_example_to :pit, pry: true # алиас it
+
+  rspec.after(:example, pry: true) do |ex|
+    require 'pry' # подключаем гем например
+    binding.pry
+  end
+end
+пишем в тесте
+pit '...' do
+--------------------------------------------
+Хуки
+RSpec.describe MyApp::Configuration do
+  before(:example) do
+    @original_env = ENV.to_hash
+  end
+  after(:example) do
+    ENV.replace(@original_env)
+  end
+end
+RSpec.describe MyApp::Configuration do
+  around(:example) do |ex|
+    original_env = ENV.to_hash
+    ex.run
+    ENV.replace(original_env)
+  end
+end
+Конфигурирование в spec_helper.rb:
+RSpec.configure do |config|
+  config.around(:example) do |ex|
+    original_env = ENV.to_hash
+    ex.run
+    ENV.replace(original_env)
+  end
+end
+----------------------------------
+Расширение хуков
+Иногда хуку нужно выполнить очень трудоемкую операцию, например, создать кучу таблиц базы данных или запустить работающий веб-браузер. Запускать хук один раз для каждой спецификации было бы непомерно дорого.
+В этих случаях вы можете запустить хук только один раз для всего набора спецификаций или один раз для группы примеров. Хуки принимают аргумент :suite или :context для изменения области действия.
+RSpec.describe 'Web interface to my thermostat' do
+  before(:context) do
+    WebBrowser.launch
+  end
+  after(:context) do
+    WebBrowser.shutdown
+  end
+end
+в spec_helper
+require 'fileutils'
+RSpec.configure do |config|
+  config.before(:suite) do
+    # Remove leftover temporary files
+    FileUtils.rm_rf('tmp')
+  end
+end
+------------------------------------
+Прикручивание хелперов
+module APIHelpers
+  include Rack::Test::Methods
+  def app
+    ExpenseTracker::API.new
+  end
+end
+RSpec.describe 'Expense Tracker API', :db do
+  include APIHelpers
+  # ...
+end
+или в конфиге
+RSpec.configure do |config|
+  config.include APIHelpers
+end
+---------------------------------------
+RSpec.shared_context 'API helpers' do
+  include Rack::Test::Methods
+  def app
+    ExpenseTracker::API.new
+  end
+  before do
+    basic_authorize 'test_user', 'test_password'
+  end
+end
+RSpec.describe 'Expense Tracker API', :db do
+  include_context 'API helpers'
+  # ...
+end
+или в конфиге
+RSpec.configure do |config|
+  config.include_context 'API helpers'
+end
+-----------------------------------------
+Sharing Examples
+помещаем образец переиспользуемого кода в spec/support/kv_store_shared_examples.rb
+RSpec.shared_examples 'KV store' do |kv_store_class|
+  let(:kv_store) { kv_store_class.new }
+  it ...
+end
+в коде теста spec/hash_kv_store_spec.rb
+equire 'hash_kv_store'
+require 'support/kv_store_shared_examples'
+RSpec.describe HashKVStore do
+  it_behaves_like 'KV store', HashKVStore
+end
+будет выполнятся тот же код что и в примере , вместо kv_store_class.new подставиться HashKVStore.new
+или загнездить
+RSpec.describe 'Key-value stores' do
+  include_examples 'KV store', HashKVStore
+  include_examples 'KV store', FileKVStore
+end
