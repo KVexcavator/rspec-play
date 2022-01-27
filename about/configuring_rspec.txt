@@ -38,3 +38,30 @@ rspec path/to/a_spec.rb:37
 * локальные параметры имеют приоритет над более глобальными. Например, если в файле .rspec задан параметр --profile 5 переопределится --no-profile в файл проекта .rspec-local.
 * переменная окружения SPEC_OPTS - установленные здесь значения переопределяют значения, установленные в текстовых файлах.
 -------------------------------------
+Hooks
+Хуки позволяют вам объявлять фрагменты кода, которые выполняются до, после или вокруг ваших спецификаций. (before , after ,around)
+config.before(:example) do
+в отдельных случаях можно зацепить через тег
+RSpec.configure do |config|
+  config.when_first_matching_example_defined(:db) do
+    require 'support/db'
+  end
+end
+--------------------------------------
+Расширение модулями
+config.include ExtraExampleMethods - в каждый пример добавляет метод
+config.prepend ImportantExampleMethods - в каждом примере заменяет метод
+config.extend ExtraGroupMethods - каждой группе добавляет методы
+
+если нужно поделиться например, хуками или определениями let — нужно определить общую группу примеров. Затем добавить эту общую группу в свой блок конфигурации:
+config.include_context 'My Shared Group'
+------------------------------------
+Фильтация
+config.example_status_persistence_file_path = 'spec/examples.txt'
+где сохранять статус
+config.filter_run_excluding :specific_to_some_os
+Исключает примеры из запуска; полезно для постоянных исключений на основе факторов среды, таких как ОС, версия Ruby или переменная среды.
+config.filter_run_when_matching :some_metadata
+фиьтр по тегам, например, RSpec запускает только примеры с метаданными :focus.
+------------------------------------
+Метаданные 159
