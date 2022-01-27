@@ -1,5 +1,3 @@
-require_relative "../my_config.rb"
-
 class Tea
   def flavor
     :earl_grey

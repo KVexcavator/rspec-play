@@ -1,5 +1,3 @@
-require_relative "../my_config.rb"
-
 class Coffee
   def ingredients
     @ingredients ||=[]
