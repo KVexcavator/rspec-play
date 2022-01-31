@@ -64,4 +64,58 @@ config.filter_run_excluding :specific_to_some_os
 config.filter_run_when_matching :some_metadata
 фиьтр по тегам, например, RSpec запускает только примеры с метаданными :focus.
 ------------------------------------
-Метаданные 159
+Метаданные
+- сonfig.define_derived_metadata(file_path: /unit/) { |meta| meta[:type] = :unit }
+Здесь мы помечаем все спецификации в каталоге юнитов типом: :unit.
+- config.alias_example_to :alias_for_it, some_metadata: :value
+Определяет альтернативу встроенному методу it, который создает пример и прикрепляет метаданные.
+- config.alias_example_group_to :alias_for_describe, some_metadata: :value
+Определяет альтернативу встроенному методу describe, который создает группу примеров и прикрепляет метаданные.
+------------------------------------
+Опции вывода информации(Output Options)
+- config.warnings = true
+Включает режим предупреждений Ruby, если не используется что-то вроде ruby_warning_filter, чтобы убрать часть шума.
+- config.profile_examples = 2
+RSpec измерит, сколько времени заняла каждая спецификация, и напечатает заданное количество самых медленных примеров и групп
+
+- config.backtrace_exclusion_patterns << /vendor/
+Исключает из трассировки все строки, соответствующие заданным регулярным выражениям; например, строки, содержащие текст vendor
+- config.filter_gems_from_backtrace :rack, :sinatra
+Исключает из трассировки сткрки из определенных библиотек
+
+- config.add_formatter Fuubar # gem 'fuubar'
+- config.add_formatter 'documentation', $stdout
+- config.add_formatter 'html', 'specs.html'
+куча способов, добавить форматирование от кастомных до гемов (стр 150-160)
+- config.default_formatter = config.files_to_run.one? ? 'doc' : 'progress'
+RSpec по умолчанию будет использовать форматировщик более подробной документации, если вы запускаете только один файл спецификаций, или форматировщик прогресса, если вы запускаете несколько файлов.
+-----------------------------------------
+Конфигурация библиотек
+Помимо встроеных моков, есть гемы, например гем Mocha.
+config.mock_with :mocha
+
+RSpec также поддерживает библиотеки имитации :rr и :flexmock.
+config.mock_with :rspec do |mocks|
+  mocks.verify_partial_doubles = true
+  mocks.verify_doubled_constant_names = true
+end
+- mocks.verify_partial_doubles = true
+Проверяет, что каждый частичный двойник — нормальный объект, который был частично изменен с помощью тестового двойника — соответствует исходному интерфейсу объекта.
+- mocks.verify_doubled_constant_names = true
+При создании проверочного двойника с использованием такой строки, как SomeClassName" , RSpec проверит, что SomeClassName действительно существует.
+-----------------------------------------
+Ожидания(Expectations)
+expect_with позволяет вам выбрать другую структуру утверждений вместо rspec-expectations:
+config.expect_with :minitest, :rspec, Wrong # gem wrong
+----------------------------------------
+Экзотические настройки
+
+- сonfig.disable_monkey_patching!
+старый синтаксис спек
+knife.should be_useful
+в новом синтаксисе тоже самое
+expect(knife).to be_useful
+лучше выключить от греха
+
+- config.order = :random
+порядок вывода спек, рандом, что бы глаз не замылился
