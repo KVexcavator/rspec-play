@@ -1,0 +1,26 @@
+играться в irb
+require 'rspec/expectations'
+include RSpec::Matchers
+expect(1).to eq(1)
+------------------------------------------
+Элементы ожидания:
+expect(deck.cards.count).to eq(52), 'not playing with a full deck'
+- subject  -  deck.cards.count
+- matcher  -  eq(52)
+- failure message - 'not playing with a full deck'
+------------------------------------------
+Оборачивание
+expect_one = expect(1)
+be_one = eq(1)
+expect_one.to(be_one)
+тоже самое, что и expect(1).to eq(1)
+------------------------------------------
+!!! not_to или to_not без разницы
+------------------------------------------
+Кастомизация сообщений об ощибке
+Struct.new(:status, :body).new(400, 'unknown query param `sort`')
+expect(resp.status).to eq(200), "Got a #{resp.status}: #{resp.body}"
+или
+expect(resp.status).to eq(200), resp.method(:body)
+===========================================
+Как матчеры работают?
