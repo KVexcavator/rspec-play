@@ -18,9 +18,98 @@ expect_one.to(be_one)
 !!! not_to или to_not без разницы
 ------------------------------------------
 Кастомизация сообщений об ощибке
-Struct.new(:status, :body).new(400, 'unknown query param `sort`')
+resp = Struct.new(:status, :body).new(400, 'unknown query param `sort`')
 expect(resp.status).to eq(200), "Got a #{resp.status}: #{resp.body}"
 или
-expect(resp.status).to eq(200), resp.method(:body)
+expect(resp.status).to eq
+(200), resp.method(:body)
 ===========================================
 Как матчеры работают?
+матчеры реализуют теже протоколы, что и регулярные выражения, что позволяет использовать их аналогичным образом
+например
+matcher = Object.new
+expect(1).to matcher
+выдаст исключение NoMethodError: undefined method `matches?'...
+что бы все заработало нужно определить соответствующие методы:
+def matcher.matches?(actual); actual == 1;end
+def matcher.failure_message;"error";end
+=====================================
+Составные матчеры, бывают трёх видов:
+• один матчер передается напрямую в другой
+• матчеры встроены в структуры данных Array и Hash.
+• матчеры комбинируются и/или операторами
+---------------------------------------
+!!! такое работает в Ruby
+/^\[warn\] / === '[warn] Disk space low'
+=> true
+/^ruby/ === ["ruby","on","rails"].join(", ")
+=> true
+(1..10) === 5
+=> true
+---------------------------------------
+внутри матчер устроен как case:
+def describe_value(value)
+  case value
+  when be_within(0.1).of(Math::PI) then 'Pi'
+  when be_within(0.1).of(2 * Math::PI) then 'Double Pi'
+  end
+end
+describe_value(3.14159) => "Pi"
+describe_value(6.28319) => "Double Pi"
+-----------------------------------------
+Передача одного матчера в другой
+numbers = [3.14159, 1.734, 4.273]
+expect(numbers).to start_with( be_within(0.1).of(Math::PI) )
+или с использованием алиаса
+expect(numbers).to start_with( a_value_within(0.1).of(Math::PI) )
+-----------------------------------------
+Вставка матчеров в массив
+presidents = [
+  { name: 'George Washington', birth_year: 1732 },
+  { name: 'John Adams', birth_year: 1735 },
+  { name: 'Thomas Jefferson', birth_year: 1743 },
+  # ...
+]
+expect(presidents).to start_with(
+  { name: 'George Washington', birth_year: a_value_between(1730, 1740) },
+  { name: 'John Adams', birth_year: a_value_between(1730, 1740) }
+)
+-----------------------------------------
+Комбинирование матчеров and/or операторами
+можно использовать & и | операторы
+alphabet = ('a'..'z').to_a
+expect(alphabet).to start_with('a') & end_with('z')
+stoplight_color = %w[ green red yellow ].sample
+expect(stoplight_color).to eq('green') | eq('red') | eq('yellow')
+или обернуть
+start_with_a_and_end_with_z = start_with('a').and end_with('z')
+expect(['a', 'z']).to start_with_a_and_end_with_z
+или скомбинировать
+letter_ranges = ['N to Z', 'A to M']
+expect(letter_ranges).to contain_exactly(
+  a_string_starting_with('A') & ending_with('M'),
+  a_string_starting_with('N') & ending_with('Z')
+)
+---------------------------------------------
+Документирование основанное на коде
+в irb
+start_with(1).description => "start with 1"
+в консоли
+rspec any_spec.rb --format documentation
+пример с тспользованием subject
+(should/should_not, is_expected короткая запись expect(subject))
+class CookieRecipe
+  attr_reader :ingredients
+  def initialize
+    @ingredients = [:butter, :milk, :flour, :sugar, :eggs, :chocolate_chips]
+  end
+end
+RSpec.describe CookieRecipe, '#ingredients' do
+  subject { CookieRecipe.new.ingredients }
+  it { is_expected.to include(:butter, :milk, :eggs) }
+  it { is_expected.not_to include(:fish_oil) }
+end
+с --format documentation вернет
+CookieRecipe#ingredients
+  should include :butter, :milk, and :eggs
+  should not include :fish_oil
