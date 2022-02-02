@@ -1,6 +1,5 @@
 class NameExtractor
   def self.extract_from(text, &block)
-    # Look for patterns like (###) ###-####
     text.scan(/Melinda|Bob|Sabina/, &block)
   end
 end
