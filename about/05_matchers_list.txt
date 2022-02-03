@@ -94,7 +94,7 @@ expect(user).to be_an_admin
 hash = { name: 'Harry Potter', age: 17, house: 'Gryffindor' }
 expect(hash).to have_key(:age)
 
-Прочие нюфнсы:
+Прочие нюaнсы:
 В диншимические предикаты можно передавать аргументы и блоки
 expect(user.admin?).to eq(true) вернет ошибку
 expect(array_of_hashes).to include(have_key(:lol)) пример комбинирования

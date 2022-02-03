@@ -1,5 +1,6 @@
 example_id                         | status  | run_time        |
 ---------------------------------- | ------- | --------------- |
+./spec/calendar_spec.rb[1:1]       | passed  | 0.0031 seconds  |
 ./spec/coffee_spec.rb[1:1]         | passed  | 0.00061 seconds |
 ./spec/coffee_spec.rb[1:2:1]       | passed  | 0.00083 seconds |
 ./spec/coffee_spec.rb[1:2:2]       | passed  | 0.00103 seconds |
@@ -19,3 +20,5 @@ example_id                         | status  | run_time        |
 ./spec/sandwich_spec.rb[1:2]       | passed  | 0.03052 seconds |
 ./spec/tea_spec.rb[1:1]            | passed  | 0.00074 seconds |
 ./spec/tea_spec.rb[1:2]            | passed  | 0.00147 seconds |
+./spec/tokenizer_spec.rb[1:1]      | passed  | 0.00121 seconds |
+./spec/water_spec.rb[1:1]          | passed  | 0.00206 seconds |
