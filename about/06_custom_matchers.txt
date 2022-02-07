@@ -1,0 +1,150 @@
+Написание собственных матчеров
+=========================================
+Делегирование встроенных методов в хелпер методы
+-----------------------------------------
+дано
+expect(ledger.expenses_on('2017-06-10')).to contain_exactly(
+  a_hash_including(id: result_1.expense_id),
+  a_hash_including(id: result_2.expense_id)
+)
+делегируем в модуль
+module ExpenseTrackerMatchers
+  def an_expense_identified_by(id)
+    a_hash_including(id: id)
+  end
+end
+передаем в конфиг
+config.include ExpenseTrackerMatchers
+применяем
+expect(ledger.expenses_on('2017-06-10')).to contain_exactly(
+  an_expense_identified_by(result_1.expense_id),
+  an_expense_identified_by(result_2.expense_id)
+)
+-----------------------------------------
+Определения алиаса матчера
+с методом алиаса alias_matcher
+RSpec::Matchers.alias_matcher :an_admin, :be_an_admin
+просмотреть описание
+be_an_admin.description -> "be an admin"
+an_admin.description -> "an admin"
+определить другое описание
+RSpec::Matchers.alias_matcher :an_admin, :be_an_admin do |old_description|
+  old_description.sub('be an admin', 'a superuser')
+end
+'be an admin'.description -> 'a superuser'
+---------------------------------------------
+определение негативного матчера
+дано
+expect(correct_grammar).to_not split_infinitives
+определяем матчер
+RSpec::Matchers.define_negated_matcher :avoid_splitting_infinitives, :split_infinitives
+применяем
+expect(correct_grammar).to avoid_splitting_infinitives
+--------------------------------------------
+Применеие Matcher DSL
+на выходе хотим иметь матчер
+expect(account).to have_a_balance_of(30)
+минимальная реализация
+RSpec::Matchers.define :have_a_balance_of do |amount|
+  match { |account| account.current_balance == amount }
+end
+улучшенная реализация
+RSpec::Matchers.define :have_a_balance_of do |amount|
+  match { |account| account.current_balance == amount }
+  failure_message { |account| super() + failure_reason(account) }
+  failure_message_when_negated { |account| super() + failure_reason(account) }
+  private
+  def failure_reason(account)
+    ", but had a balance of #{account.current_balance}"
+  end
+end
+
+добавление гибкого интерфейса
+хотим на ввыходе цепочку
+expect(account).to have_a_balance_of(10).as_of(Date.new(2017, 6, 12))
+добавляем в реализацию chain
+RSpec::Matchers.define :have_a_balance_of do |amount|
+  chain(:as_of) { |date| @as_of_date = date }
+  match { |account| account_balance(account) == amount }
+  failure_message { |account| super() + failure_reason(account) }
+  failure_message_when_negated { |account| super() + failure_reason(account) }
+
+  private
+  def failure_reason(account)
+    ", but had a balance of #{account_balance(account)}"
+  end
+
+  def account_balance(account)
+    if @as_of_date
+      account.balance_as_of(@as_of_date)
+    else
+      account.current_balance
+    end
+  end
+end
+для того что бы кастоьный матчер выше мог делать
+expect(account).to have_a_balance_of(a_value < 11_000_000)
+или
+expect(account).to have_a_balance_of(a_value_within(50).of(10_500_000))
+надо строку
+match { |account| account_balance(account) == amount }
+заменить
+match { |account| values_match?(amount, account_balance(account)) }
+-----------------------------------------
+Определение Matcher Class
+class HaveABalanceOf
+  include RSpec::Matchers::Composable
+
+  def initialize(amount)
+    @amount = amount
+  end
+
+  def as_of(date)
+    @as_of_date = date
+    self
+  end
+
+  def matches?(account)
+    @account = account
+    values_match?(@amount, account_balance)
+  end
+
+  def description
+    if @as_of_date
+      "have a balance of #{description_of(@amount)} as of #{@as_of_date}"
+    else
+      "have a balance of #{description_of(@amount)}"
+    end
+  end
+
+  def failure_message
+    "expected #{@account.inspect} to #{description}" + failure_reason
+  end
+
+  def failure_message_when_negated
+    "expected #{@account.inspect} not to #{description}" + failure_reason
+  end
+
+  private
+
+  def failure_reason
+    ", but had a balance of #{account_balance}"
+  end
+
+  def account_balance
+    if @as_of_date
+      @account.balance_as_of(@as_of_date)
+    else
+      @account.current_balance
+    end
+  end
+end
+Интеграция класса в RSpec
+module AccountMatchers
+  def have_a_balance_of(amount)
+    HaveABalanceOf.new(amount)
+  end
+end
+RSpec.configure do |config|
+  config.include AccountMatchers
+end
