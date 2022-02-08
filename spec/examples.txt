@@ -1,28 +1,29 @@
-example_id                         | status  | run_time        |
----------------------------------- | ------- | --------------- |
-./spec/calendar_spec.rb[1:1]       | passed  | 0.0031 seconds  |
-./spec/coffee_spec.rb[1:1]         | passed  | 0.00061 seconds |
-./spec/coffee_spec.rb[1:2:1]       | passed  | 0.00083 seconds |
-./spec/coffee_spec.rb[1:2:2]       | passed  | 0.00103 seconds |
-./spec/coffee_spec.rb[1:2:3]       | passed  | 0.00169 seconds |
-./spec/data_generator_spec.rb[1:1] | passed  | 0.0023 seconds  |
-./spec/data_generator_spec.rb[1:2] | passed  | 0.00153 seconds |
-./spec/data_generator_spec.rb[1:3] | passed  | 0.00144 seconds |
-./spec/data_generator_spec.rb[1:4] | passed  | 0.0006 seconds  |
-./spec/data_generator_spec.rb[1:5] | passed  | 0.03255 seconds |
-./spec/event_matchers_spec.rb[1:1] | passed  | 0.00029 seconds |
-./spec/event_matchers_spec.rb[1:2] | failed  | 0.02569 seconds |
-./spec/event_matchers_spec.rb[2:1] | passed  | 0.00308 seconds |
-./spec/event_matchers_spec.rb[2:2] | failed  | 0.00395 seconds |
-./spec/match_aliases.rb[1:1]       | passed  | 0.0044 seconds  |
-./spec/metadata_spec.rb[1:1]       | passed  | 0.00528 seconds |
-./spec/metadata_spec.rb[1:2:1]     | unknown |                 |
-./spec/name_extractor_spec.rb[1:1] | passed  | 0.00719 seconds |
-./spec/pablic_company_spec.rb[1:1] | passed  | 0.00846 seconds |
-./spec/pablic_company_spec.rb[1:2] | passed  | 0.00379 seconds |
-./spec/sandwich_spec.rb[1:1]       | passed  | 0.0002 seconds  |
-./spec/sandwich_spec.rb[1:2]       | passed  | 0.03052 seconds |
-./spec/tea_spec.rb[1:1]            | passed  | 0.00074 seconds |
-./spec/tea_spec.rb[1:2]            | passed  | 0.00147 seconds |
-./spec/tokenizer_spec.rb[1:1]      | passed  | 0.00121 seconds |
-./spec/water_spec.rb[1:1]          | passed  | 0.00206 seconds |
+example_id                          | status  | run_time        |
+----------------------------------- | ------- | --------------- |
+./spec/calendar_spec.rb[1:1]        | passed  | 0.0031 seconds  |
+./spec/coffee_spec.rb[1:1]          | passed  | 0.00061 seconds |
+./spec/coffee_spec.rb[1:2:1]        | passed  | 0.00083 seconds |
+./spec/coffee_spec.rb[1:2:2]        | passed  | 0.00103 seconds |
+./spec/coffee_spec.rb[1:2:3]        | passed  | 0.00169 seconds |
+./spec/data_generator_spec.rb[1:1]  | passed  | 0.0023 seconds  |
+./spec/data_generator_spec.rb[1:2]  | passed  | 0.00153 seconds |
+./spec/data_generator_spec.rb[1:3]  | passed  | 0.00144 seconds |
+./spec/data_generator_spec.rb[1:4]  | passed  | 0.0006 seconds  |
+./spec/data_generator_spec.rb[1:5]  | passed  | 0.03255 seconds |
+./spec/event_matchers_spec.rb[1:1]  | passed  | 0.00029 seconds |
+./spec/event_matchers_spec.rb[1:2]  | failed  | 0.02569 seconds |
+./spec/event_matchers_spec.rb[2:1]  | passed  | 0.00308 seconds |
+./spec/event_matchers_spec.rb[2:2]  | failed  | 0.00395 seconds |
+./spec/match_aliases.rb[1:1]        | passed  | 0.0044 seconds  |
+./spec/metadata_spec.rb[1:1]        | passed  | 0.00528 seconds |
+./spec/metadata_spec.rb[1:2:1]      | unknown |                 |
+./spec/name_extractor_spec.rb[1:1]  | passed  | 0.00719 seconds |
+./spec/pablic_company_spec.rb[1:1]  | passed  | 0.00846 seconds |
+./spec/pablic_company_spec.rb[1:2]  | passed  | 0.00379 seconds |
+./spec/sandwich_spec.rb[1:1]        | passed  | 0.0002 seconds  |
+./spec/sandwich_spec.rb[1:2]        | passed  | 0.03052 seconds |
+./spec/skier_exc/skier_spec.rb[1:1] | failed  | 0.00045 seconds |
+./spec/tea_spec.rb[1:1]             | passed  | 0.00074 seconds |
+./spec/tea_spec.rb[1:2]             | passed  | 0.00147 seconds |
+./spec/tokenizer_spec.rb[1:1]       | passed  | 0.00121 seconds |
+./spec/water_spec.rb[1:1]           | passed  | 0.00206 seconds |
