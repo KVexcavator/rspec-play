@@ -1,0 +1,137 @@
+Конфигурации откликов:
+https://relishapp.com/rspec/rspec-mocks/v/3-6/docs/configuring-responses
+-----------------------------------------
+allow(double).to receive(:a_message).and_return(a_return_value)
+allow(double).to receive(:a_message).and_raise(AnException)
+allow(double).to receive(:a_message).and_yield(a_value_to_a_block)
+allow(double).to receive(:a_message).and_throw(:a_symbol, optional_value)
+allow(double).to receive(:a_message) { |arg| do_something_with(arg) }
+
+# Эти последние два предназначены только для частичных двойников:
+allow(object).to receive(:a_message).and_call_original
+allow(object).to receive(:a_message).and_wrap_original { |original| }
+=========================================
+возвращение множественных значений
+вернет последовательно, по окончании будет возвращать последнее
+allow(random).to receive(:rand).and_return(0.1, 0.2, 0.3)
+random.rand => 0.1
+random.rand => 0.2
+random.rand => 0.3
+random.rand => 0.3
+----------------------------------------
+Йалдинг множественных значений( в примере получаем url и id):
+extractor = double('TwitterURLExtractor')
+
+allow(extractor).to receive(:extract_urls_from_twitter_firehose)
+  .and_yield('https://rspec.info/', 93284234987)
+  .and_yield('https://github.com/', 43984523459)
+  .and_yield('https://pragprog.com/', 33745639845)
+----------------------------------------
+Обработка исключений
+по сути зеркало Ruby https://ruby-doc.org/core-2.4.1/Kernel.html#method-i-raise
+allow(dbl).to receive(:msg).and_raise(AnExceptionClass)
+allow(dbl).to receive(:msg).and_raise('an error message')
+allow(dbl).to receive(:msg).and_raise(AnExceptionClass, 'with a message')
+
+an_exception_instance = AnExceptionClass.new
+allow(dbl).to receive(:msg).and_raise(an_exception_instance)
+----------------------------------------
+Возврат к исходной реализации
+# фейковая реализация для отдельных методов
+allow(File).to receive(:read).with('/etc/passwd').and_raise('HAHA NOPE')
+# возврат к исходнику
+allow(File).to receive(:read).and_call_original
+-----------------------------------------
+Модификация возвращаемого значения:
+allow(CustomerService).to receive(:all).and_wrap_original do |original|
+  all_customers = original.call
+  all_customers.sort_by(&:id).take(10)
+end
+-----------------------------------------
+Настройка аргументов
+allow(PasswordHash).to receive(:hash_password)
+  .and_wrap_original do |original, cost_factor|
+    original.call(1)
+end
+-----------------------------------------
+Добавление большей гибгости в блоке
+counter = 0
+allow(weather_api).to receive(:temperature) do |zip_code|
+  counter = (counter + 1) % 4
+  counter.zero? ? raise(Timeout::Error) : 35.0
+end
+==========================================
+Установка ограничений
+Если заглушить метод с именем jump без других опций, RSpec будет использовать эту заглушку всякий раз, когда код вызывает jump, jump(:with, :arguments) или jump {with_a_block}.
+------------------------------------------
+Ограничение аргументов
+expect(movie).to receive(:record_review).with('Great movie!')
+expect(movie).to receive(:record_review).with(/Great/)
+expect(movie).to receive(:record_review).with('Great movie!', 5)
+использование с ожиданиями
+expect(movie).to receive(:record_review).with('Good')
+movie.record_review('Bad') => error
+использование с позволениями
+allow(imdb).to receive(:rating_for).and_return(3) по умолчанию
+allow(imdb).to receive(:rating_for).with('Jaws').and_return(5) для опредуленного
+imdb.rating_for('Weekend at Bernies') => 3
+imdb.rating_for('Jaws') => 5
+-----------------------------------------
+Резервирование места для аргументов
+с anything точное количество
+expect(cart).to receive(:add_product).with('Hoodie', anything, anything)
+any_args распакует любое количество аргументов
+expect(cart).to receive(:add_product).with('Hoodie', any_args)
+no_args отбросит все аргументы
+expect(database).to receive(:delete_all_the_things).with(no_args)
+----------------------------------------
+Хеш аргументы и Аргументы с ключевыми словами
+class BoxOffice
+  def find_showtime(**options)
+
+class BoxOffice
+  def find_showtime(movie:, zip_code: nil, city: nil, state: nil)
+
+обрабатываются одинаково
+expect(box_office).to receive(:find_showtime)
+  .with(hash_including(movie: 'Jaws'))
+---------------------------------------
+Кастомная логика для повторного использования
+RSpec::Matchers.define :a_city_in_oregon do
+  match { |options| options[:state] == 'OR' && options[:city] }
+end
+expect(box_office).to receive(:find_showtime).with(a_city_in_oregon)
+---------------------------------------
+Ограничение количества вызовов метода
+для once, twice, thrice
+client = instance_double('NasdaqClient')
+expect(client).to receive(:current_price).thrice.and_raise(Timeout::Error)
+stock_ticker = StockTicker.new(client)
+100.times { stock_ticker.price('AAPL') }
+для большего количества
+expect(client).to receive(:current_price).exactly(4).times
+минимум
+expect(client).to receive(:current_price).at_least(:once)
+expect(client).to receive(:current_price).at_least(3).times
+максимум
+expect(client).to receive(:current_price).at_most(:thrice)
+expect(client).to receive(:current_price).at_most(10).times
+при вызове с определением возвращаемого(на третий раз будет ошибка)
+expect(client).to receive(:current_price).at_most(:twice).and_return(130.0)
+----------------------------------------
+Порядок
+В обычном режиме RSpec не следит за порядком вызова
+expect(greeter).to receive(:hello)
+expect(greeter).to receive(:goodbye)
+# это пройдет:
+greeter.goodbye
+greeter.hello
+если его надо определить
+expect(greeter).to receive(:hello).ordered
+expect(greeter).to receive(:goodbye).ordered
+# это упадет:
+greeter.goodbye
+greeter.hello
+---------------------------------------
+все момжно комбинировать
+еxpect(catalog).to receive(:search).with(/term/).at_least(:twice).ordered
